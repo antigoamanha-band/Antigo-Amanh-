@@ -4,9 +4,9 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ink: "#0b0b0d",
-        bone: "#f5f3ef",
-        accent: "#c04b29",
+        ink: "#09091e",
+        bone: "#f0ede8",
+        accent: "#e84820",
       },
       fontFamily: { display: ["Georgia", "serif"] },
     },
