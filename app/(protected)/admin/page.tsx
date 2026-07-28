@@ -1,0 +1,12 @@
+"use client";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { supabase, Profile } from "@/lib/supabase";
+export const dynamic = "force-dynamic";
+export default function Admin() {
+  const router = useRouter(); const [profiles, setProfiles] = useState<Profile[]>([]); const [me, setMe] = useState<Profile | null>(null); const [loading, setLoading] = useState(true);
+  useEffect(() => { async function load() { const { data:{session} } = await supabase.auth.getSession(); if (!session) { router.push("/login"); return; } const { data:myProfile } = await supabase.from("profiles").select("*").eq("id",session.user.id).single(); if (!myProfile||myProfile.role!=="admin") { router.push("/projetos"); return; } setMe(myProfile); const { data } = await supabase.from("profiles").select("*").order("created_at"); setProfiles(data||[]); setLoading(false); } load(); }, [router]);
+  async function updateRole(profileId:string,role:"admin"|"member") { if (!me?.is_owner) return; const { error }=await supabase.from("profiles").update({role}).eq("id",profileId); if (error) { alert("Erro: "+error.message); return; } setProfiles(ps=>ps.map(p=>p.id===profileId?{...p,role}:p)); }
+  if (loading) return <div className="flex items-center justify-center py-20"><div className="w-6 h-6 rounded-full border-2 border-accent border-t-transparent animate-spin" /></div>;
+  return (<div className="space-y-6"><h1 className="font-display text-2xl text-bone">Administração</h1><div className="rounded-2xl border border-white/10 overflow-hidden"><div className="divide-y divide-white/5">{profiles.map(p => (<div key={p.id} className="flex items-center justify-between px-5 py-4"><div><p className="text-bone text-sm font-medium">{p.nome}</p><p className="text-bone/40 text-xs mt-0.5">{p.funcao||"-"}</p></div><div className="flex items-center gap-3">{p.is_owner && <span className="text-[10px] bg-accent/10 text-accent border border-accent/20 rounded-full px-2.5 py-1">Dono</span>}{me?.is_owner&&!p.is_owner ? <select value={p.role} onChange={e=>updateRole(p.id,e.target.value as "admin"|"member")} className="text-xs rounded-lg bg-white/5 border border-white/10 text-bone px-2.5 py-1.5 focus:outline-none"><option value="member">Membro</option><option value="admin">Admin</option></select> : (!p.is_owner && <span className={`text-xs rounded-full px-2.5 py-1 ${p.role==="admin"?"bg-accent/15 text-accent":"bg-white/5 text-bone/30"}`}>{p.role==="admin"?"Admin":"Membro"}</span>)}</div></div>))}</div></div></div>);
+}

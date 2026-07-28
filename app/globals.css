@@ -1,10 +1,5 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-html { scroll-behavior: smooth; }
-
-body {
-  background-color: #09091e;
-  color: #f0ede8;
-}
+html { background-color: #09091e; color: #f0ede8; }
+* { box-sizing: border-box; }
